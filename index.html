@@ -1,0 +1,430 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WordTurn Game</title>
+<style>
+:root{--bg:#10162a;--panel:#1b2540;--text:#f5f7ff;--muted:#b2bfdc;--accent:#a99aff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif}
+main{max-width:800px;margin:auto;padding:20px 14px 40px}
+h1{font-size:2rem;margin:0}
+h2{font-size:1.2rem;margin:0 0 12px}
+p{color:var(--muted);line-height:1.5}
+.panel{background:var(--panel);padding:20px;border-radius:18px;margin:16px 0}
+input,textarea,select{width:100%;padding:12px;border-radius:10px;border:1px solid #46516f;background:#10182f;color:white;font:inherit;margin:5px 0 12px}
+button{padding:12px 16px;border:0;border-radius:11px;font:inherit;font-weight:700;cursor:pointer;margin:4px 3px 4px 0}
+.primary{background:linear-gradient(120deg,#b1a4ff,#71e4d0);color:#11152a}
+.secondary{background:#35415f;color:white}
+.danger{background:#6a3044;color:white}
+.player{display:flex;align-items:center;gap:10px;margin:10px 0}
+.avatar{font-size:24px;width:42px;height:42px;border-radius:12px;display:grid;place-items:center}
+.pattern{display:flex;justify-content:center;gap:7px;margin:22px 0}
+.tile{background:#303d5e;border:1px solid #536184;border-radius:10px;width:52px;height:60px;display:grid;place-items:center;font-size:2rem;font-weight:800}
+.fixed{background:#493f78}
+.turn{padding:14px;border-radius:13px;background:#303d5e;margin-bottom:18px}
+.status{padding:12px;border-radius:10px;background:#303d5e;margin:12px 0;line-height:1.5}
+.good{background:#15523f}.bad{background:#672d40}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid #63708e;border-radius:10px;padding:8px}
+.hidden{display:none!important}
+small{color:var(--muted)}
+label{font-weight:650}
+hr{border:0;border-top:1px solid #46516f;margin:18px 0}
+@media(max-width:500px){.panel{padding:15px}.tile{width:42px;height:52px;font-size:1.6rem}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>🔤 WordTurn</h1>
+  <p>Your friends. Your words. Your turn!</p>
+</header>
+
+<section id="setup">
+  <div class="panel">
+    <h2>1. Players</h2>
+    <label for="count">Number of players</label>
+    <select id="count">
+      <option>2</option><option>3</option><option>4</option>
+      <option>5</option><option>6</option><option>7</option>
+      <option>8</option><option>9</option><option>10</option>
+      <option>11</option><option>12</option>
+    </select>
+    <div id="names"></div>
+  </div>
+
+  <div class="panel">
+    <h2>2. Word patterns and answers</h2>
+    <p>A dash means a missing letter. For example, --LT matches BOLT. Add accepted answers separated by commas.</p>
+    <div id="patterns"></div>
+    <button class="secondary" id="addPattern">＋ Add pattern</button>
+    <button class="secondary" id="examples">Restore examples</button>
+  </div>
+
+  <div class="panel">
+    <h2>3. Game rules</h2>
+    <label for="attempts">Wrong attempts allowed per turn</label>
+    <select id="attempts">
+      <option value="1">1 attempt</option>
+      <option value="2" selected>2 attempts</option>
+      <option value="3">3 attempts</option>
+      <option value="4">4 attempts</option>
+      <option value="5">5 attempts</option>
+    </select>
+    <label for="passRule">When a player cannot answer</label>
+    <select id="passRule">
+      <option value="out">Eliminate that player</option>
+      <option value="mistake">Count it as one wrong attempt</option>
+    </select>
+    <p><small>Answers are checked against your custom lists. Used words cannot be repeated.</small></p>
+  </div>
+  <button class="primary" id="start" style="width:100%">🚀 Start game</button>
+  <p id="setupError"></p>
+</section>
+
+<section id="playing" class="hidden">
+  <div class="panel">
+    <div class="turn" id="turn"></div>
+    <small id="progress"></small>
+    <div id="tiles" class="pattern"></div>
+    <p id="hint" style="text-align:center"></p>
+    <form id="answerForm">
+      <label for="answer">Enter your word</label>
+      <input id="answer" autocomplete="off" placeholder="Type your answer..." required>
+      <button class="primary" type="submit">Submit word</button>
+    </form>
+    <div id="message" class="status">Enter a word matching the pattern.</div>
+    <button id="pass" class="danger">I can't answer</button>
+    <button id="toggleUsed" class="secondary">Show used words</button>
+    <div id="usedBox" class="hidden">
+      <h2>Used words</h2>
+      <div id="used" class="chips"></div>
+    </div>
+  </div>
+  <div class="panel">
+    <h2>Players</h2>
+    <div id="playerStatus" class="chips"></div>
+  </div>
+  <button id="restart" class="secondary">Restart game</button>
+  <button id="edit" class="secondary">Edit setup</button>
+</section>
+
+<section id="result" class="panel hidden">
+  <h2 id="resultTitle">Game finished</h2>
+  <p id="resultText"></p>
+  <div id="finalPlayers" class="chips"></div>
+  <hr>
+  <button id="again" class="primary">Play again</button>
+  <button id="change" class="secondary">Edit setup</button>
+</section>
+</main>
+
+<script>
+"use strict";
+
+const palette=[
+  ["⚡","#70a7ff"],["💖","#ff83c5"],["🍀","#60e3a5"],
+  ["🔥","#ffad66"],["👑","#b19aff"],["🐬","#5fe1df"],
+  ["🚀","#ff7c82"],["⭐","#f4d56d"],["🦄","#d2a6ff"],
+  ["🌿","#9be9bd"],["🧡","#ff9b83"],["🌙","#8bdcff"]
+];
+
+const examples=[
+  {pattern:"--LT",words:"BOLT, COLT, JOLT, MOLT"},
+  {pattern:"B--K",words:"BARK, BANK, BEAK, BIKE, BOOK, BULK, BUNK"},
+  {pattern:"A--LE",words:"APPLE, AMPLE, ANGLE"},
+  {pattern:"--ING",words:"BRING, CLING, FLING, GOING, THING, SWING"}
+];
+
+const $=id=>document.getElementById(id);
+let config=null,game=null,timer=null;
+
+function show(id){
+  ["setup","playing","result"].forEach(s=>$(s).classList.toggle("hidden",s!==id));
+  window.scrollTo(0,0);
+}
+function safe(s){
+  return String(s).replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[c]);
+}
+function renderNames(old=[]){
+  $("names").innerHTML="";
+  for(let i=0;i<+$("count").value;i++){
+    const p=palette[i];
+    const row=document.createElement("div");
+    row.className="player";
+    row.innerHTML=`
+      <div class="avatar" style="color:${p[1]};background:#303d5e">${p[0]}</div>
+      <div style="flex:1">
+        <label for="name${i}">Player ${i+1}</label>
+        <input id="name${i}" maxlength="24" value="${safe(old[i]||"Player "+(i+1))}" required>
+      </div>`;
+    $("names").appendChild(row);
+  }
+}
+function addPattern(pattern="",words=""){
+  const card=document.createElement("div");
+  card.className="pattern-card";
+  card.style.cssText="border:1px solid #46516f;border-radius:12px;padding:12px;margin:12px 0";
+  card.innerHTML=`
+    <label>Pattern (example: --LT)</label>
+    <input class="pat" maxlength="20" value="${safe(pattern)}" placeholder="--LT">
+    <label>Accepted words (comma-separated)</label>
+    <textarea class="words" rows="3" placeholder="BOLT, COLT, JOLT">${safe(words)}</textarea>
+    <button type="button" class="danger remove">Remove pattern</button>`;
+  card.querySelector(".remove").onclick=()=>{
+    if($("patterns").children.length===1){alert("Keep at least one pattern.");return;}
+    card.remove();
+  };
+  $("patterns").appendChild(card);
+}
+function renderPatterns(items){
+  $("patterns").innerHTML="";
+  items.forEach(p=>addPattern(p.pattern,p.words));
+}
+function readConfig(){
+  const players=[];
+  for(let i=0;i<+$("count").value;i++){
+    const name=$("name"+i).value.trim();
+    if(!name)throw Error("Enter a name for every player.");
+    players.push({name,emoji:palette[i][0],color:palette[i][1],active:true});
+  }
+  if(new Set(players.map(p=>p.name.toLowerCase())).size!==players.length)
+    throw Error("Each player needs a different name.");
+
+  const patterns=[...$("patterns").querySelectorAll(".pattern-card")].map((card,i)=>{
+    const pattern=card.querySelector(".pat").value.trim().toUpperCase().replace(/\s/g,"");
+    const words=[...new Set(card.querySelector(".words").value.toUpperCase().split(",").map(w=>w.trim()).filter(Boolean))];
+    if(!pattern||!/^[A-Z-]+$/.test(pattern)||!pattern.includes("-"))
+      throw Error("Pattern "+(i+1)+" must contain letters and at least one dash.");
+    if(!words.length)throw Error("Add accepted words to pattern "+(i+1)+".");
+    const re=new RegExp("^"+[...pattern].map(c=>c==="-"?"[A-Z]":c).join("")+"$");
+    const invalid=words.find(w=>!re.test(w));
+    if(invalid)throw Error(invalid+" does not match pattern "+pattern+".");
+    return {pattern,words,used:[]};
+  });
+  if(!patterns.length)throw Error("Add at least one pattern.");
+  return {players,patterns,maxMistakes:+$("attempts").value,passRule:$("passRule").value};
+}
+function startGame(){
+  clearTimeout(timer);
+  try{
+    config=readConfig();
+    try{localStorage.setItem("wordturnSetup",JSON.stringify({
+      count:$("count").value,
+      names:config.players.map(p=>p.name),
+      patterns:config.patterns.map(p=>({pattern:p.pattern,words:p.words.join(", ")})),
+      attempts:config.maxMistakes,passRule:config.passRule
+    }));}catch(e){}
+    game={
+      players:config.players.map(p=>({...p})),
+      patterns:config.patterns.map(p=>({...p,used:[]})),
+      maxMistakes:config.maxMistakes,passRule:config.passRule,
+      current:0,patternIndex:0,mistakes:0,turns:0,finished:false
+    };
+    $("setupError").textContent="";
+    show("playing");
+    prepareTurn();
+  }catch(e){$("setupError").textContent=e.message;}
+}
+function alive(){return game.players.filter(p=>p.active);}
+function nextActive(from){
+  for(let i=1;i<=game.players.length;i++){
+    const j=(from+i)%game.players.length;
+    if(game.players[j].active)return j;
+  }
+  return from;
+}
+function nextPattern(from){
+  for(let i=0;i<game.patterns.length;i++){
+    const j=(from+i)%game.patterns.length;
+    if(game.patterns[j].words.some(w=>!game.patterns[j].used.includes(w)))return j;
+  }
+  return -1;
+}
+function prepareTurn(){
+  if(game.finished)return;
+  if(alive().length<=1){finish();return;}
+  const pi=nextPattern(game.patternIndex);
+  if(pi<0){finish(true);return;}
+  game.patternIndex=pi;
+  if(!game.players[game.current].active)game.current=nextActive(game.current);
+  game.mistakes=0;
+  renderGame();
+  message("Find an unused word matching "+game.patterns[game.patternIndex].pattern+".");
+  $("answer").value="";
+  $("answer").disabled=false;
+  $("answer").focus({preventScroll:true});
+}
+function currentPattern(){return game.patterns[game.patternIndex];}
+function renderGame(){
+  const p=game.players[game.current],pat=currentPattern();
+  $("turn").style.borderLeft="5px solid "+p.color;
+  $("turn").innerHTML=`<div style="font-size:1.7rem">${p.emoji} <strong>${safe(p.name)}</strong></div><div style="color:${p.color}">It's your turn!</div>`;
+  $("progress").textContent="Turn "+(game.turns+1)+" · Pattern "+(game.patternIndex+1)+" of "+game.patterns.length;
+  $("tiles").innerHTML="";
+  [...pat.pattern].forEach(c=>{
+    const t=document.createElement("span");
+    t.className="tile"+(c==="-"?"":" fixed");
+    t.textContent=c==="-"?"_":c;
+    $("tiles").appendChild(t);
+  });
+  $("hint").textContent=pat.pattern.length+" letters · Fill every blank";
+  $("playerStatus").innerHTML="";
+  game.players.forEach((player,i)=>{
+    const chip=document.createElement("span");
+    chip.className="chip";
+    chip.style.borderColor=player.active?player.color:"#596078";
+    chip.style.opacity=player.active?"1":".45";
+    chip.innerHTML=`${player.emoji} ${safe(player.name)}${player.active?"":" ✕"}${i===game.current&&player.active?" ←":""}`;
+    $("playerStatus").appendChild(chip);
+  });
+  $("used").innerHTML="";
+  if(!pat.used.length)$("used").innerHTML="<small>No words used yet.</small>";
+  pat.used.forEach(w=>{
+    const chip=document.createElement("span");chip.className="chip";chip.textContent=w;$("used").appendChild(chip);
+  });
+}
+function message(text,type=""){
+  $("message").className="status "+type;
+  $("message").textContent=text;
+}
+function wrong(text){
+  game.mistakes++;
+  const left=game.maxMistakes-game.mistakes;
+  if(left<=0)eliminate(text+" No attempts left.");
+  else message(text+" Attempts remaining: "+left,"bad");
+}
+function submitAnswer(e){
+  e.preventDefault();
+  if(game.finished)return;
+  const word=$("answer").value.trim().toUpperCase().replace(/\s/g,"");
+  const pat=currentPattern();
+  const re=new RegExp("^"+[...pat.pattern].map(c=>c==="-"?"[A-Z]":c).join("")+"$");
+  if(!word)return;
+  if(!re.test(word)){wrong("That word does not match "+pat.pattern+".");return;}
+  if(!pat.words.includes(word)){wrong(word+" is not in the accepted-word list.");return;}
+  if(pat.used.includes(word)){wrong(word+" has already been used.");return;}
+  pat.used.push(word);
+  game.turns++;
+  message("Correct! "+word+" is accepted.","good");
+  $("answer").disabled=true;
+  renderGame();
+  message("Correct! "+word+" is accepted.","good");
+  timer=setTimeout(()=>{
+    if(game.finished)return;
+    game.current=nextActive(game.current);
+    game.patternIndex=(game.patternIndex+1)%game.patterns.length;
+    prepareTurn();
+  },800);
+}
+function eliminate(reason){
+  const p=game.players[game.current];
+  p.active=false;
+  $("answer").disabled=true;
+  message(p.name+" is out. "+reason,"bad");
+  renderGame();
+  timer=setTimeout(()=>{
+    if(alive().length<=1)finish();
+    else{
+      game.current=nextActive(game.current);
+      game.patternIndex=(game.patternIndex+1)%game.patterns.length;
+      prepareTurn();
+    }
+  },900);
+}
+function pass(){
+  if(game.finished)return;
+  if(game.passRule==="out")eliminate("Could not find a word.");
+  else wrong("Pass counts as a failed attempt.");
+}
+function finish(wordsExhausted=false){
+  game.finished=true;
+  clearTimeout(timer);
+  show("result");
+  const survivors=alive();
+  $("finalPlayers").innerHTML="";
+  survivors.forEach(p=>{
+    const chip=document.createElement("span");
+    chip.className="chip";
+    chip.style.borderColor=p.color;
+    chip.textContent=p.emoji+" "+p.name;
+    $("finalPlayers").appendChild(chip);
+  });
+  if(survivors.length===1){
+    $("resultTitle").textContent="🏆 "+survivors[0].name+" wins!";
+    $("resultText").textContent="Everyone else ran out of answers. Congratulations!";
+  }else if(wordsExhausted){
+    $("resultTitle").textContent="🤝 Word list complete!";
+    $("resultText").textContent="All accepted words have been used. Remaining players share the win. Add more words to extend the game.";
+  }else{
+    $("resultTitle").textContent="Game finished!";
+    $("resultText").textContent="Thanks for playing WordTurn.";
+  }
+}
+function editSetup(){
+  if(game&&!game.finished&&!confirm("Leave this game? Current progress will be lost."))return;
+  clearTimeout(timer);show("setup");
+}
+$("count").addEventListener("change",()=>{
+  const names=[];
+  for(let i=0;i<+$("count").value;i++){
+    const el=$("name"+i);names.push(el?el.value:"Player "+(i+1));
+  }
+  renderNames(names);
+});
+$("addPattern").onclick=()=>addPattern();
+$("examples").onclick=()=>{
+  if(confirm("Replace patterns with the example list?"))renderPatterns(examples);
+};
+$("start").onclick=startGame;
+$("answerForm").addEventListener("submit",submitAnswer);
+$("pass").onclick=pass;
+$("toggleUsed").onclick=()=>{
+  $("usedBox").classList.toggle("hidden");
+  $("toggleUsed").textContent=$("usedBox").classList.contains("hidden")?"Show used words":"Hide used words";
+};
+$("restart").onclick=()=>{
+  if(confirm("Restart from the beginning?"))startGame();
+};
+$("edit").onclick=editSetup;
+$("change").onclick=()=>{
+  if(config){
+    $("count").value=String(config.players.length);
+    renderNames(config.players.map(p=>p.name));
+    renderPatterns(config.patterns.map(p=>({pattern:p.pattern,words:p.words.join(", ")})));
+    $("attempts").value=String(config.maxMistakes);
+    $("passRule").value=config.passRule;
+  }
+  show("setup");
+};
+$("again").onclick=()=>{
+  if(config){
+    $("count").value=String(config.players.length);
+    renderNames(config.players.map(p=>p.name));
+    renderPatterns(config.patterns.map(p=>({pattern:p.pattern,words:p.words.join(", ")})));
+    $("attempts").value=String(config.maxMistakes);
+    $("passRule").value=config.passRule;
+    startGame();
+  }
+};
+renderNames();
+renderPatterns(examples);
+
+try{
+  const old=JSON.parse(localStorage.getItem("wordturnSetup")||"null");
+  if(old){
+    $("count").value=String(old.count||2);
+    renderNames(old.names||[]);
+    renderPatterns(old.patterns||examples);
+    $("attempts").value=String(old.attempts||2);
+    $("passRule").value=old.passRule||"out";
+  }
+}catch(e){}
+</script>
+</body>
+</html>
