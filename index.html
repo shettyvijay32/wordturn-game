@@ -1,0 +1,935 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fill the Word!</title>
+
+<style>
+:root {
+  --accent: #6658e8;
+  --background: #f5f6fc;
+  --text: #24243b;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 18px;
+  font-family: Arial, sans-serif;
+  background: var(--background);
+  color: var(--text);
+}
+.container { max-width: 760px; margin: auto; }
+h1 { text-align: center; }
+.subtitle { text-align: center; color: #777; }
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin: 16px 0;
+  box-shadow: 0 5px 20px #2222220a;
+}
+label {
+  display: block;
+  font-weight: bold;
+  margin: 15px 0 7px;
+}
+input, select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d6d6e5;
+  border-radius: 9px;
+  font-size: 16px;
+}
+button {
+  padding: 12px 16px;
+  border: none;
+  border-radius: 9px;
+  background: var(--accent);
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+button:disabled { opacity: .55; cursor: wait; }
+.secondary { background: #eae8ff; color: #4135b0; }
+.danger { background: #fff0f0; color: #b42332; }
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+.names {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.player {
+  border: 2px solid #eee;
+  border-radius: 10px;
+  padding: 11px;
+  margin: 8px 0;
+}
+.player.active { border-color: var(--accent); background: #f3f1ff; }
+.muted { color: #777; font-size: 13px; }
+.hidden { display: none !important; }
+.pattern {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 25px 0;
+}
+.fixed, .blank {
+  width: 52px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  font-size: 27px;
+  font-weight: bold;
+  text-align: center;
+}
+.fixed { background: #eae8ff; color: #4536b3; }
+.blank {
+  width: 52px;
+  padding: 0;
+  border: 2px solid #bcb5ff;
+  text-transform: lowercase;
+}
+.blank:focus { outline: 3px solid #dedaff; }
+.status {
+  background: #f3f3fa;
+  border-radius: 10px;
+  padding: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  margin: 12px 0;
+}
+.status.error { background: #fff0f0; color: #a52030; }
+.status.success { background: #eaf8ef; color: #176535; }
+.meaning-box {
+  background: #edf8f0;
+  border: 1px solid #c9e9d2;
+  border-radius: 12px;
+  padding: 15px;
+  margin-top: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.meaning-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #176535;
+  margin-bottom: 5px;
+}
+.chip {
+  display: inline-block;
+  background: #efedff;
+  padding: 6px 9px;
+  border-radius: 7px;
+  margin: 3px;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+hr { border: 0; border-top: 1px solid #eee; margin: 22px 0; }
+@media(max-width: 480px) {
+  body { padding: 10px; }
+  .card { padding: 15px; }
+  .names { grid-template-columns: 1fr; }
+  .fixed, .blank { width: 42px; height: 52px; font-size: 23px; }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h1>🔤 Fill the Word!</h1>
+  <p class="subtitle">Complete the blanks. Find a real English word.</p>
+
+  <section class="card" id="setup">
+    <h2>Game settings</h2>
+
+    <label for="patternInput">Choose your own pattern</label>
+    <input id="patternInput" value="g--t" maxlength="30"
+      placeholder="Example: g--t, r--e, --t">
+    <p class="muted">Each dash represents one missing letter.</p>
+
+    <label for="playerCount">Number of players</label>
+    <select id="playerCount">
+      <option value="2">2 players</option>
+      <option value="3">3 players</option>
+      <option value="4">4 players</option>
+      <option value="5">5 players</option>
+      <option value="6">6 players</option>
+      <option value="7">7 players</option>
+      <option value="8">8 players</option>
+      <option value="9">9 players</option>
+      <option value="10">10 players</option>
+      <option value="11">11 players</option>
+      <option value="12">12 players</option>
+    </select>
+
+    <label>Player names</label>
+    <div class="names" id="nameFields"></div>
+
+    <div class="buttons">
+      <button id="startButton">Start game</button>
+    </div>
+    <p class="muted">Internet is required for dictionary checks and hints.</p>
+  </section>
+
+  <section class="card hidden" id="game">
+    <h2>Players</h2>
+    <div id="players"></div>
+
+    <hr>
+
+    <div style="text-align:center">
+      <p id="turnLabel"></p>
+      <h2 id="patternLabel"></h2>
+      <p class="muted">Type one letter into each blank.</p>
+    </div>
+
+    <div class="pattern" id="letterSlots"></div>
+
+    <div class="status" id="message" role="status" aria-live="polite">
+      Fill in the blanks to begin.
+    </div>
+
+    <div class="meaning-box" id="meaningBox" aria-live="polite">
+      <div class="meaning-title">📖 Word meaning</div>
+      The definition will appear here after a correct answer.
+    </div>
+
+    <div class="buttons">
+      <button class="secondary" id="clearButton">Clear blanks</button>
+      <button class="secondary" id="hintButton">💡 Get a hint</button>
+      <button class="danger" id="giveUpButton">I can't find a word</button>
+    </div>
+
+    <h3>Used words</h3>
+    <div id="wordHistory">No words used yet.</div>
+  </section>
+
+  <section class="card hidden" id="result">
+    <h2 id="resultTitle">Game over</h2>
+    <p id="resultText"></p>
+    <div class="buttons">
+      <button id="againButton">Play again</button>
+      <button class="secondary" id="settingsButton">Change settings</button>
+    </div>
+  </section>
+</div>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+
+const emojis = [
+  "🦊","🐼","🐯","🐸","🦁","🐨",
+  "🐵","🐰","🐧","🐻","🦄","🐙"
+];
+
+const colors = [
+  "#6658e8","#d94d68","#138b71","#d17b19",
+  "#3274d9","#a04ac2","#9b6b35","#16869c",
+  "#bf4c96","#63852b","#6754a6","#c45c34"
+];
+
+let state = null;
+let checking = false;
+let hinting = false;
+let turnToken = 0;
+let hintToken = 0;
+let hintUsed = false;
+
+/* PLAYER NAMES */
+
+function buildNameFields() {
+  const count = Number($("playerCount").value);
+  const oldNames = [...document.querySelectorAll(".nameField")]
+    .map(input => input.value);
+
+  $("nameFields").replaceChildren();
+
+  for (let i = 0; i < count; i++) {
+    const input = document.createElement("input");
+    input.className = "nameField";
+    input.maxLength = 24;
+    input.value = oldNames[i] || `Player ${i + 1}`;
+    input.setAttribute("aria-label", `Player ${i + 1} name`);
+    $("nameFields").appendChild(input);
+  }
+}
+
+$("playerCount").addEventListener("change", buildNameFields);
+buildNameFields();
+
+/* UI HELPERS */
+
+function showMessage(text, type = "") {
+  $("message").textContent = text;
+  $("message").className = "status " + type;
+}
+
+function showMeaning(word, definition, partOfSpeech = "") {
+  const box = $("meaningBox");
+  box.replaceChildren();
+
+  const title = document.createElement("div");
+  title.className = "meaning-title";
+  title.textContent = "📖 " + word;
+
+  const description = document.createElement("div");
+  description.textContent = definition;
+  box.append(title, description);
+
+  if (partOfSpeech) {
+    const part = document.createElement("div");
+    part.className = "muted";
+    part.style.marginTop = "6px";
+    part.textContent = "Part of speech: " + partOfSpeech;
+    box.appendChild(part);
+  }
+}
+
+function resetMeaning() {
+  showMeaning(
+    "Word meaning",
+    "The definition will appear here after a correct answer."
+  );
+}
+
+function setControlsDisabled(disabled) {
+  document.querySelectorAll(".blank").forEach(input => {
+    input.disabled = disabled;
+  });
+
+  $("clearButton").disabled = disabled || hinting;
+  $("giveUpButton").disabled = disabled || hinting;
+  $("hintButton").disabled = disabled || hinting;
+}
+
+/* RENDER PLAYERS */
+
+function renderPlayers() {
+  $("players").replaceChildren();
+
+  state.players.forEach((player, index) => {
+    const row = document.createElement("div");
+    row.className = "player" +
+      (index === state.current ? " active" : "");
+
+    const title = document.createElement("strong");
+    title.textContent = `${player.emoji} ${player.name}`;
+    title.style.color = player.color;
+
+    const detail = document.createElement("div");
+    detail.className = "muted";
+    detail.textContent = index === state.current
+      ? "Current turn"
+      : "Waiting for turn";
+
+    row.append(title, detail);
+    $("players").appendChild(row);
+  });
+}
+
+/* LETTER INPUTS */
+
+function renderSlots() {
+  $("letterSlots").replaceChildren();
+
+  for (let index = 0; index < state.pattern.length; index++) {
+    const character = state.pattern[index];
+
+    if (character !== "-") {
+      const fixed = document.createElement("div");
+      fixed.className = "fixed";
+      fixed.textContent = character;
+      $("letterSlots").appendChild(fixed);
+      continue;
+    }
+
+    const input = document.createElement("input");
+    input.className = "blank";
+    input.type = "text";
+    input.maxLength = 1;
+    input.autocomplete = "off";
+    input.spellcheck = false;
+    input.placeholder = "_";
+    input.dataset.position = String(index);
+    input.setAttribute("aria-label", `Blank at position ${index + 1}`);
+
+    input.addEventListener("input", () => {
+      input.value = input.value.toLowerCase()
+        .replace(/[^a-z]/g, "").slice(-1);
+
+      if (input.value) {
+        const next = [...document.querySelectorAll(".blank")]
+          .find(blank =>
+            !blank.value &&
+            Number(blank.dataset.position) > index
+          );
+
+        if (next) next.focus();
+      }
+
+      checkCompletedWord();
+    });
+
+    input.addEventListener("keydown", event => {
+      if (event.key === "Backspace" && !input.value) {
+        const previous = [...document.querySelectorAll(".blank")]
+          .filter(blank =>
+            Number(blank.dataset.position) < index
+          ).pop();
+
+        if (previous) previous.focus();
+      }
+    });
+
+    $("letterSlots").appendChild(input);
+  }
+}
+
+function getCompletedWord() {
+  if (!state) return null;
+
+  const blanks = [...document.querySelectorAll(".blank")];
+  let blankIndex = 0;
+  let word = "";
+
+  for (const character of state.pattern) {
+    if (character === "-") {
+      const input = blanks[blankIndex++];
+      if (!input || !input.value) return null;
+      word += input.value;
+    } else {
+      word += character;
+    }
+  }
+
+  return word;
+}
+
+/*
+  DICTIONARY LOOKUP
+
+  Try both sources. A successful response with
+  definitions validates the word. A failed request
+  is not treated as an invalid word.
+*/
+
+async function fetchWithTimeout(url, timeoutMs = 8000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, { signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function dictionaryApi(word) {
+  const response = await fetchWithTimeout(
+    "https://api.dictionaryapi.dev/api/v2/entries/en/" +
+    encodeURIComponent(word)
+  );
+
+  if (response.status === 404) {
+    return { found: false, definitions: [] };
+  }
+
+  if (!response.ok) {
+    throw new Error("Dictionary API unavailable");
+  }
+
+  const data = await response.json();
+
+  const definitions = (Array.isArray(data) ? data : [])
+    .flatMap(entry =>
+      (entry.meanings || []).flatMap(meaning =>
+        (meaning.definitions || [])
+          .map(item => ({
+            definition: item.definition,
+            partOfSpeech: meaning.partOfSpeech || ""
+          }))
+          .filter(item =>
+            typeof item.definition === "string" &&
+            item.definition.trim().length > 0
+          )
+      )
+    );
+
+  return {
+    found: definitions.length > 0,
+    definitions
+  };
+}
+
+async function wiktionaryApi(word) {
+  const response = await fetchWithTimeout(
+    "https://en.wiktionary.org/api/rest_v1/page/definition/" +
+    encodeURIComponent(word)
+  );
+
+  if (response.status === 404) {
+    return { found: false, definitions: [] };
+  }
+
+  if (!response.ok) {
+    throw new Error("Backup dictionary unavailable");
+  }
+
+  const data = await response.json();
+
+  const definitions = (data.en || []).flatMap(entry =>
+    (entry.definitions || [])
+      .map(item => ({
+        definition: item.definition,
+        partOfSpeech: entry.partOfSpeech || ""
+      }))
+      .filter(item =>
+        typeof item.definition === "string" &&
+        item.definition.trim().length > 0
+      )
+  );
+
+  return {
+    found: definitions.length > 0,
+    definitions
+  };
+}
+
+async function isEnglishWord(word) {
+  if (!/^[a-z]+$/.test(word)) {
+    return { valid: false, definitions: [] };
+  }
+
+  const sources = [dictionaryApi, wiktionaryApi];
+  let successfulLookups = 0;
+
+  for (const source of sources) {
+    try {
+      const result = await source(word);
+      successfulLookups++;
+
+      if (result.found && result.definitions.length) {
+        return {
+          valid: true,
+          definitions: result.definitions
+        };
+      }
+    } catch (error) {
+      // Continue to the backup dictionary.
+    }
+  }
+
+  if (successfulLookups === 0) {
+    throw new Error("All dictionary sources failed");
+  }
+
+  return { valid: false, definitions: [] };
+}
+
+/* WORD HISTORY */
+
+function renderHistory() {
+  $("wordHistory").replaceChildren();
+
+  if (!state.history.length) {
+    $("wordHistory").textContent = "No words used yet.";
+    return;
+  }
+
+  state.history.forEach(item => {
+    const chip = document.createElement("span");
+    chip.className = "chip";
+    chip.textContent = `${item.word} — ${item.player}`;
+    $("wordHistory").appendChild(chip);
+  });
+}
+
+/* CLEAR INPUTS */
+
+function clearBlanks() {
+  if (checking || hinting || !state) return;
+
+  document.querySelectorAll(".blank").forEach(input => {
+    input.value = "";
+  });
+
+  hintUsed = false;
+  resetMeaning();
+  showMessage("Blanks cleared. Try another word.");
+
+  const first = document.querySelector(".blank");
+  if (first) first.focus();
+}
+
+/* CHECK WORD */
+
+async function checkCompletedWord() {
+  if (checking || hinting || !state || state.finished) return;
+
+  const word = getCompletedWord();
+
+  if (!word) {
+    showMessage("Keep filling the blanks, one letter at a time.");
+    return;
+  }
+
+  if (state.used.has(word)) {
+    showMessage(
+      `"${word}" has already been used. Change a letter or clear the blanks.`,
+      "error"
+    );
+    return;
+  }
+
+  checking = true;
+  const myToken = ++turnToken;
+
+  setControlsDisabled(true);
+  showMessage("Checking the word and its definition…");
+
+  try {
+    const result = await isEnglishWord(word);
+
+    if (!state || state.finished || myToken !== turnToken) return;
+
+    if (!result.valid) {
+      checking = false;
+      setControlsDisabled(false);
+
+      showMessage(
+        `"${word}" was not found with a dictionary definition. Try another word.`,
+        "error"
+      );
+
+      const blanks = [...document.querySelectorAll(".blank")];
+      const last = blanks[blanks.length - 1];
+
+      if (last) {
+        last.focus();
+        last.select();
+      }
+      return;
+    }
+
+    if (state.used.has(word)) {
+      checking = false;
+      setControlsDisabled(false);
+      showMessage("That word has already been used.", "error");
+      return;
+    }
+
+    const player = state.players[state.current];
+    const meaning = result.definitions[0];
+
+    state.used.add(word);
+    state.history.push({ word, player: player.name });
+
+    renderHistory();
+    showMeaning(word, meaning.definition, meaning.partOfSpeech);
+
+    showMessage(`Accepted: "${word}"! Next player's turn.`, "success");
+
+    state.current = (state.current + 1) % state.players.length;
+    renderPlayers();
+
+    $("turnLabel").textContent =
+      `${state.players[state.current].emoji} ` +
+      `${state.players[state.current].name}'s turn`;
+
+    setTimeout(() => {
+      if (!state || state.finished || myToken !== turnToken) return;
+
+      checking = false;
+      hintUsed = false;
+
+      renderSlots();
+      setControlsDisabled(false);
+      showMessage("Enter one letter in each blank.");
+
+      const first = document.querySelector(".blank");
+      if (first) first.focus();
+    }, 1200);
+
+  } catch (error) {
+    if (!state || state.finished || myToken !== turnToken) return;
+
+    checking = false;
+    setControlsDisabled(false);
+
+    showMessage(
+      "Both dictionary services failed to respond. " +
+      "Check your connection and try again. Your word was not accepted.",
+      "error"
+    );
+  }
+}
+
+/* HINT SYSTEM */
+
+async function giveHint() {
+  if (!state || state.finished || checking || hinting) return;
+
+  const blanks = [...document.querySelectorAll(".blank")];
+  const emptyBlanks = blanks.filter(input => !input.value);
+
+  if (!emptyBlanks.length) {
+    showMessage("All blanks are filled. Your word will be checked.");
+    return;
+  }
+
+  hinting = true;
+  const myHintToken = ++hintToken;
+  const myTurnToken = turnToken;
+  const patternAtStart = state.pattern;
+
+  $("hintButton").disabled = true;
+  $("clearButton").disabled = true;
+  $("giveUpButton").disabled = true;
+
+  showMessage("Searching for a word and checking its definition…");
+
+  try {
+    const currentBlanks = new Map(
+      [...document.querySelectorAll(".blank")].map(input => [
+        Number(input.dataset.position),
+        input.value.toLowerCase()
+      ])
+    );
+
+    const searchPattern = [...state.pattern]
+      .map((character, index) => {
+        if (character !== "-") return character;
+        return currentBlanks.get(index) || "?";
+      })
+      .join("");
+
+    const response = await fetchWithTimeout(
+      "https://api.datamuse.com/words?sp=" +
+      encodeURIComponent(searchPattern) + "&max=100"
+    );
+
+    if (!response.ok) throw new Error("Hint service unavailable");
+
+    const suggestions = await response.json();
+
+    if (
+      !state || state.finished ||
+      myHintToken !== hintToken ||
+      myTurnToken !== turnToken ||
+      state.pattern !== patternAtStart
+    ) return;
+
+    const candidates = suggestions
+      .map(item => item.word?.toLowerCase())
+      .filter(word =>
+        typeof word === "string" &&
+        /^[a-z]+$/.test(word) &&
+        word.length === state.pattern.length &&
+        [...state.pattern].every((character, index) => {
+          if (character !== "-") return character === word[index];
+
+          const entered = currentBlanks.get(index);
+          return !entered || entered === word[index];
+        }) &&
+        !state.used.has(word)
+      );
+
+    let candidate = null;
+
+    for (const word of candidates.slice(0, 8)) {
+      const result = await isEnglishWord(word);
+
+      if (
+        !state || state.finished ||
+        myHintToken !== hintToken ||
+        myTurnToken !== turnToken
+      ) return;
+
+      if (result.valid && result.definitions.length) {
+        candidate = {
+          word,
+          definition: result.definitions[0].definition
+        };
+        break;
+      }
+    }
+
+    if (!candidate) {
+      showMessage(
+        "No suitable hint was found for this pattern. Try another pattern.",
+        "error"
+      );
+      return;
+    }
+
+    const available = [...document.querySelectorAll(".blank")]
+      .filter(input => !input.value);
+
+    if (!available.length) return;
+
+    // Reveal a random empty position, not necessarily
+    // the first missing letter.
+    const target = available[
+      Math.floor(Math.random() * available.length)
+    ];
+
+    const position = Number(target.dataset.position);
+    target.value = candidate.word[position];
+    hintUsed = true;
+
+    showMeaning("💡 Hint", candidate.definition);
+
+    showMessage(
+      "One letter has been revealed. Use the definition clue to finish the word.",
+      "success"
+    );
+
+    target.dispatchEvent(new Event("input", { bubbles: true }));
+
+  } catch (error) {
+    if (state && !state.finished && myHintToken === hintToken) {
+      showMessage(
+        "The hint service or dictionary is unavailable. Check your connection and try again.",
+        "error"
+      );
+    }
+  } finally {
+    if (myHintToken === hintToken) {
+      hinting = false;
+
+      if (state && !state.finished && !checking) {
+        $("hintButton").disabled = false;
+        $("clearButton").disabled = false;
+        $("giveUpButton").disabled = false;
+      }
+    }
+  }
+}
+
+/* START GAME */
+
+function startGame() {
+  const pattern = $("patternInput").value.trim().toLowerCase();
+
+  if (!/^[a-z-]+$/.test(pattern) || !pattern.includes("-")) {
+    alert("Use English letters and at least one dash, such as g--t, r--e, or --t.");
+    return;
+  }
+
+  const names = [...document.querySelectorAll(".nameField")]
+    .map((input, index) =>
+      input.value.trim() || `Player ${index + 1}`
+    );
+
+  turnToken++;
+  hintToken++;
+
+  checking = false;
+  hinting = false;
+  hintUsed = false;
+
+  state = {
+    pattern,
+    players: names.map((name, index) => ({
+      name,
+      emoji: emojis[index],
+      color: colors[index]
+    })),
+    current: 0,
+    used: new Set(),
+    history: [],
+    finished: false
+  };
+
+  $("setup").classList.add("hidden");
+  $("result").classList.add("hidden");
+  $("game").classList.remove("hidden");
+
+  $("patternLabel").textContent = `Pattern: ${pattern}`;
+
+  $("turnLabel").textContent =
+    `${state.players[0].emoji} ${state.players[0].name}'s turn`;
+
+  renderPlayers();
+  renderSlots();
+  renderHistory();
+  resetMeaning();
+  setControlsDisabled(false);
+
+  showMessage("Fill the blanks to form an English word.");
+
+  const first = document.querySelector(".blank");
+  if (first) first.focus();
+}
+
+/* FINISH GAME */
+
+function finishGame() {
+  if (!state || state.finished || checking || hinting) return;
+
+  state.finished = true;
+  turnToken++;
+  hintToken++;
+
+  const player = state.players[state.current];
+  const others = state.players
+    .filter((_, index) => index !== state.current)
+    .map(player => player.name);
+
+  $("game").classList.add("hidden");
+  $("result").classList.remove("hidden");
+
+  $("resultTitle").textContent =
+    `${player.emoji} ${player.name} couldn't find a word!`;
+
+  $("resultText").textContent =
+    `The game ended on pattern "${state.pattern}". ` +
+    `${player.name} gave up. ` +
+    (others.length ? `Other players: ${others.join(", ")}.` : "");
+}
+
+/* EVENTS */
+
+$("startButton").addEventListener("click", startGame);
+$("clearButton").addEventListener("click", clearBlanks);
+$("hintButton").addEventListener("click", giveHint);
+$("giveUpButton").addEventListener("click", finishGame);
+
+$("againButton").addEventListener("click", () => {
+  turnToken++;
+  hintToken++;
+  checking = false;
+  hinting = false;
+
+  $("result").classList.add("hidden");
+  $("setup").classList.remove("hidden");
+  $("game").classList.add("hidden");
+});
+
+$("settingsButton").addEventListener("click", () => {
+  turnToken++;
+  hintToken++;
+  checking = false;
+  hinting = false;
+
+  $("result").classList.add("hidden");
+  $("game").classList.add("hidden");
+  $("setup").classList.remove("hidden");
+});
+</script>
+</body>
+</html>
