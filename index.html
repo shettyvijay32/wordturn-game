@@ -3,1226 +3,472 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fill the Word Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fill the Word!</title>
 
 <style>
 :root {
-  --accent: #6658e8;
-  --background: #f5f6fc;
-  --text: #24243b;
+--accent: #6658e8;
+  --bg: #f5f6fc;
+  --text: #20223a;
+  --muted: #73768b;
+  --card: #ffffff;
 }
-
 * { box-sizing: border-box; }
-
 body {
-  margin: 0;
-  padding: 18px;
-  font-family: Arial, sans-serif;
-  background: var(--background);
-  color: var(--text);
-}
-
-.container { max-width: 760px; margin: auto; }
-
-h1 { text-align: center; }
-
-.subtitle {
-  text-align: center;
-  color: #777;
-}
-
-.card {
-  background: white;
-  border-radius: 16px;
+margin: 0;
   padding: 20px;
-  margin: 16px 0;
-  box-shadow: 0 5px 20px #2222220a;
+  background: var(--bg);
+  color: var(--text);
+font-family: Arial, sans-serif;
 }
-
-label {
-  display: block;
-  font-weight: bold;
-  margin: 15px 0 7px;
+.container { max-width: 760px; margin: auto; }
+h1 { text-align: center; margin-bottom: 5px; }
+.subtitle { text-align: center; color: var(--muted); margin-bottom: 25px; }
+.card {
+  background: var(--card);
+  padding: 22px;
+  border-radius: 18px;
+margin: 16px 0;
+  box-shadow: 0 5px 22px #20223a0b;
 }
-
+label { display: block; font-weight: bold; margin: 14px 0 7px; }
 input, select {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #d6d6e5;
-  border-radius: 9px;
-  font-size: 16px;
-}
-
-button {
-  padding: 12px 16px;
-  border: none;
-  border-radius: 9px;
-  background: var(--accent);
-  color: white;
-  font-size: 15px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-button:disabled {
-  opacity: .55;
-  cursor: wait;
-}
-
-.secondary {
-  background: #eae8ff;
-  color: #4135b0;
-}
-
-.danger {
-  background: #fff0f0;
-  color: #b42332;
-}
-
-.buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.names {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.player {
-  border: 2px solid #eee;
-  border-radius: 10px;
+  font: inherit;
   padding: 11px;
-  margin: 8px 0;
+  border: 1px solid #d9dbea;
+  border-radius: 9px;
+width: 100%;
+  background: white;
 }
-
-.player.active {
-  border-color: var(--accent);
-  background: #f3f1ff;
-}
-
-.muted {
-  color: #777;
-  font-size: 13px;
-}
-
-.hidden { display: none !important; }
-
-.pattern {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 25px 0;
-}
-
-.fixed, .blank {
-  width: 52px;
-  height: 60px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 10px;
-  font-size: 27px;
+button {
+  font: inherit;
   font-weight: bold;
-  text-align: center;
-}
-
-.fixed {
-  background: #eae8ff;
-  color: #4536b3;
-}
-
-.blank {
-  width: 52px;
-  padding: 0;
-  border: 2px solid #bcb5ff;
-  text-transform: lowercase;
-}
-
-.blank:focus {
-  outline: 3px solid #dedaff;
-}
-
-.status {
-  background: #f3f3fa;
-  border-radius: 10px;
-  padding: 13px;
-  line-height: 1.5;
-  overflow-wrap: anywhere;
-  margin: 12px 0;
-}
-
-.status.error {
-  background: #fff0f0;
-  color: #a52030;
-}
-
-.status.success {
-  background: #eaf8ef;
-  color: #176535;
-}
-
-.meaning-box {
-  background: #edf8f0;
-  border: 1px solid #c9e9d2;
-  border-radius: 12px;
-  padding: 15px;
-  margin-top: 16px;
-  line-height: 1.6;
-  overflow-wrap: anywhere;
-}
-
-.meaning-word {
-  font-size: 20px;
-  font-weight: bold;
-  color: #176535;
-  margin-bottom: 5px;
-}
-
-.chip {
-  display: inline-block;
-  background: #efedff;
-  padding: 6px 9px;
-  border-radius: 7px;
-  margin: 3px;
-  font-size: 14px;
-  overflow-wrap: anywhere;
-}
-
-hr {
   border: 0;
-  border-top: 1px solid #eee;
-  margin: 22px 0;
+  border-radius: 10px;
+padding: 12px 16px;
+  cursor: pointer;
+background: var(--accent);
+color: white;
 }
-
+button:disabled { opacity: .55; cursor: wait; }
+button.secondary { background: #ecebff; color: #4135b0; }
+button.danger { background: #fff0f0; color: #b52c3b; }
+.buttons { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+.names { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.player {
+  padding: 12px;
+border: 2px solid #eee;
+  border-radius: 12px;
+margin: 8px 0;
+}
+.player.active { border-color: var(--accent); background: #f2f0ff; }
+.player small { color: var(--muted); }
+.pattern {
+display: flex;
+justify-content: center;
+  gap: 8px;
+flex-wrap: wrap;
+  margin: 24px 0;
+}
+.fixed-letter, .letter-input {
+  width: 54px;
+  height: 62px;
+  border-radius: 12px;
+display: flex;
+justify-content: center;
+align-items: center;
+  font-size: 28px;
+font-weight: bold;
+text-align: center;
+}
+.fixed-letter { background: #e8e7f8; color: #4135b0; }
+.letter-input {
+padding: 0;
+  border: 2px solid #c9c5f7;
+text-transform: lowercase;
+}
+.letter-input:focus { outline: 3px solid #dcd8ff; }
+.status { padding: 12px; background: #f4f4fa; border-radius: 10px; line-height: 1.5; }
+.status.error { background: #fff0f0; color: #a82030; }
+.status.success { background: #e9f9ef; color: #166534; }
+.hidden { display: none; }
+#wordHistory { line-height: 2; }
+.word-chip { background: #eeeefa; border-radius: 8px; padding: 5px 9px; margin: 3px; display: inline-block; }
 @media(max-width: 480px) {
-  body { padding: 10px; }
-  .card { padding: 15px; }
-  .names { grid-template-columns: 1fr; }
-  .fixed, .blank {
-    width: 42px;
-    height: 52px;
-    font-size: 23px;
-  }
+  body { padding: 12px; }
+  .card { padding: 16px; }
+.names { grid-template-columns: 1fr; }
+  .fixed-letter, .letter-input { width: 43px; height: 54px; font-size: 24px; }
 }
 </style>
 </head>
 
 <body>
 <div class="container">
+<h1>🔤 Fill the Word!</h1>
+  <p class="subtitle">Complete the blanks. Use a real English word!</p>
 
-  <h1>🔤 Fill the Word!</h1>
-  <p class="subtitle">
-    Complete the blanks. Find a real English word.
-  </p>
+<section class="card" id="setup">
+    <h2>⚙️ Game settings</h2>
 
-  <!-- GAME SETTINGS -->
-  <section class="card" id="setup">
-    <h2>Game settings</h2>
+    <label for="patternInput">Your word pattern</label>
+    <input id="patternInput" value="--t" placeholder="Example: --t or c--t">
+    <small>Use - for a blank and letters for fixed positions. Example: --t, c--t, a---e.</small>
 
-    <label for="patternInput">Choose your own pattern</label>
-    <input
-      id="patternInput"
-      value="g--t"
-      maxlength="30"
-      placeholder="Example: g--t, r--e, --t"
-    >
+<label for="playerCount">Number of players</label>
+<select id="playerCount">
+      <option>2</option><option>3</option><option>4</option>
+      <option>5</option><option>6</option><option>7</option>
+      <option>8</option><option>9</option><option>10</option>
+      <option>11</option><option>12</option>
+</select>
 
-    <p class="muted">
-      Each dash (-) represents one missing letter.
-      Fixed letters cannot be changed.
-    </p>
+<label>Player names</label>
+@@ -130,37 +155,40 @@
+<div class="buttons">
+<button id="startButton">Start game</button>
+</div>
+    <p><small>English dictionary checking requires an internet connection.</small></p>
+</section>
 
-    <label for="playerCount">Number of players</label>
-    <select id="playerCount">
-      <option value="2">2 players</option>
-      <option value="3">3 players</option>
-      <option value="4">4 players</option>
-      <option value="5">5 players</option>
-      <option value="6">6 players</option>
-      <option value="7">7 players</option>
-      <option value="8">8 players</option>
-      <option value="9">9 players</option>
-      <option value="10">10 players</option>
-      <option value="11">11 players</option>
-      <option value="12">12 players</option>
-    </select>
+<section class="card hidden" id="game">
+<div id="players"></div>
 
-    <label>Player names</label>
-    <div class="names" id="nameFields"></div>
+    <hr style="border:0;border-top:1px solid #eee;margin:20px 0">
 
-    <div class="buttons">
-      <button id="startButton">Start game</button>
-    </div>
-
-    <p class="muted">
-      An internet connection is required for dictionary
-      verification and hints.
-    </p>
-  </section>
-
-  <!-- GAME SCREEN -->
-  <section class="card hidden" id="game">
-
-    <h2>Players</h2>
-    <div id="players"></div>
-
-    <hr>
-
-    <div style="text-align:center">
-      <p id="turnLabel"></p>
-      <h2 id="patternLabel"></h2>
-      <p class="muted">
-        Type one letter into each blank.
-      </p>
-    </div>
-
-    <div class="pattern" id="letterSlots"></div>
-
-    <div
-      class="status"
-      id="message"
-      role="status"
-      aria-live="polite"
-    >
-      Fill in the blanks to begin.
-    </div>
-
-    <!-- WORD MEANING -->
-    <div
-      class="meaning-box"
-      id="meaningBox"
-      aria-live="polite"
-    >
-      <div class="meaning-word">📖 Word meaning</div>
-      The definition will appear here after a correct answer.
-    </div>
-
-    <!-- GAME CONTROLS -->
-    <div class="buttons">
-      <button class="secondary" id="clearButton">
-        Clear blanks
-      </button>
-
-      <button class="secondary" id="hintButton">
-        💡 Get a hint
-      </button>
-
-      <button class="danger" id="giveUpButton">
-        I can't find a word
-      </button>
-    </div>
-
-    <h3>Used words</h3>
-    <div id="wordHistory">No words used yet.</div>
-
-  </section>
-
-  <!-- RESULTS -->
-  <section class="card hidden" id="result">
-    <h2 id="resultTitle">Game over</h2>
-    <p id="resultText"></p>
-
-    <div class="buttons">
-      <button id="againButton">Play again</button>
-      <button class="secondary" id="settingsButton">
-        Change settings
-      </button>
-    </div>
-  </section>
-
+<div style="text-align:center">
+      <div id="turnLabel"><b>Current turn</b></div>
+<h2 id="patternLabel"></h2>
+      <p>Fill every blank with one letter.</p>
 </div>
 
-<script>
-"use strict";
+<div class="pattern" id="letterSlots"></div>
 
+<div class="status" id="message" role="status" aria-live="polite">
+      Enter the missing letters.
+</div>
+
+<div class="buttons">
+<button class="secondary" id="clearButton">Clear blanks</button>
+<button class="danger" id="giveUpButton">I can't find a word</button>
+</div>
+
+    <h3>Words already used</h3>
+    <div id="wordHistory">No words yet.</div>
+</section>
+
+<section class="card hidden" id="result">
+    <h2 id="resultTitle">Game over!</h2>
+<p id="resultText"></p>
+<div class="buttons">
+<button id="againButton">Play again</button>
+@@ -172,28 +200,33 @@
+<script>
 const $ = id => document.getElementById(id);
 
-const emojis = [
-  "🦊", "🐼", "🐯", "🐸", "🦁", "🐨",
-  "🐵", "🐰", "🐧", "🐻", "🦄", "🐙"
-];
-
+const emojis = ["🦊","🐼","🐯","🐸","🦁","🐨","🐵","🐰","🐧","🐻","🦄","🐙"];
 const colors = [
-  "#6658e8", "#d94d68", "#138b71", "#d17b19",
+  "#6658e8", "#db5268", "#138b71", "#d17b19",
   "#3274d9", "#a04ac2", "#9b6b35", "#16869c",
   "#bf4c96", "#63852b", "#6754a6", "#c45c34"
 ];
 
-let state = null;
+let gameState = null;
 let checking = false;
-let hinting = false;
-let turnToken = 0;
-let hintToken = 0;
-
-/* -----------------------------
-   PLAYER NAME FIELDS
------------------------------ */
 
 function buildNameFields() {
-  const count = Number($("playerCount").value);
+const count = Number($("playerCount").value);
+  const previous = [...document.querySelectorAll(".nameField")]
+.map(input => input.value);
 
-  const oldNames = [
-    ...document.querySelectorAll(".nameField")
-  ].map(input => input.value);
+  $("nameFields").innerHTML = "";
 
-  $("nameFields").replaceChildren();
-
-  for (let i = 0; i < count; i++) {
-    const input = document.createElement("input");
-
-    input.className = "nameField";
-    input.maxLength = 24;
-    input.value = oldNames[i] || `Player ${i + 1}`;
-
-    input.setAttribute(
-      "aria-label",
-      `Player ${i + 1} name`
-    );
-
-    $("nameFields").appendChild(input);
-  }
+for (let i = 0; i < count; i++) {
+const input = document.createElement("input");
+input.className = "nameField";
+input.maxLength = 24;
+    input.value = previous[i] || `Player ${i + 1}`;
+input.setAttribute("aria-label", `Player ${i + 1} name`);
+$("nameFields").appendChild(input);
 }
-
-$("playerCount").addEventListener(
-  "change",
-  buildNameFields
-);
-
-buildNameFields();
-
-/* -----------------------------
-   MESSAGES AND CONTROLS
------------------------------ */
-
-function showMessage(text, type = "") {
-  $("message").textContent = text;
-  $("message").className = "status " + type;
+@@ -207,90 +240,102 @@
+$("message").className = "status " + type;
 }
-
-function showMeaning(word, definition, partOfSpeech = "") {
-  const box = $("meaningBox");
-  box.replaceChildren();
-
-  const title = document.createElement("div");
-  title.className = "meaning-word";
-  title.textContent = "📖 " + word;
-
-  const detail = document.createElement("div");
-  detail.textContent = definition;
-
-  box.append(title, detail);
-
-  if (partOfSpeech) {
-    const part = document.createElement("div");
-    part.className = "muted";
-    part.style.marginTop = "6px";
-    part.textContent = "Part of speech: " + partOfSpeech;
-    box.appendChild(part);
-  }
-}
-
-function resetMeaning() {
-  $("meaningBox").replaceChildren();
-
-  const title = document.createElement("div");
-  title.className = "meaning-word";
-  title.textContent = "📖 Word meaning";
-
-  const text = document.createElement("div");
-  text.textContent =
-    "The definition will appear here after a correct answer.";
-
-  $("meaningBox").append(title, text);
-}
-
-function setControlsDisabled(disabled) {
-  document.querySelectorAll(".blank").forEach(input => {
-    input.disabled = disabled;
-  });
-
-  $("clearButton").disabled = disabled;
-  $("giveUpButton").disabled = disabled;
-  $("hintButton").disabled = disabled || hinting;
-}
-
-/* -----------------------------
-   RENDER PLAYERS
------------------------------ */
 
 function renderPlayers() {
-  $("players").replaceChildren();
+  $("players").innerHTML = "";
 
-  state.players.forEach((player, index) => {
-    const row = document.createElement("div");
+  gameState.players.forEach((player, index) => {
+    const div = document.createElement("div");
+    div.className = "player" + (index === gameState.current ? " active" : "");
 
-    row.className = "player" +
-      (index === state.current ? " active" : "");
+    const name = document.createElement("strong");
+    name.textContent = `${player.emoji} ${player.name}`;
+    name.style.color = player.color;
+    div.appendChild(name);
 
-    const title = document.createElement("strong");
-    title.textContent = `${player.emoji} ${player.name}`;
-    title.style.color = player.color;
+    const detail = document.createElement("small");
+    detail.textContent = index === gameState.current
+      ? " — Playing now"
+      : " — Waiting";
+    div.appendChild(document.createElement("br"));
+    div.appendChild(detail);
 
-    const detail = document.createElement("div");
-    detail.className = "muted";
+    $("players").appendChild(div);
+});
+}
 
-    detail.textContent = index === state.current
-      ? "Current turn"
-      : "Waiting for turn";
+function renderSlots() {
+  $("letterSlots").innerHTML = "";
+  const pattern = gameState.pattern;
 
-    row.append(title, detail);
-    $("players").appendChild(row);
+  pattern.split("").forEach((character, index) => {
+if (character !== "-") {
+const fixed = document.createElement("div");
+      fixed.className = "fixed-letter";
+fixed.textContent = character;
+      fixed.setAttribute("aria-label", `Fixed letter ${character}`);
+$("letterSlots").appendChild(fixed);
+    } else {
+      const input = document.createElement("input");
+      input.className = "letter-input";
+      input.maxLength = 1;
+      input.autocomplete = "off";
+      input.spellcheck = false;
+      input.dataset.position = index;
+      input.setAttribute("aria-label", `Blank ${index + 1}`);
+      input.placeholder = "_";
+      input.disabled = checking;
+
+      input.addEventListener("input", () => {
+        input.value = input.value.toLowerCase().replace(/[^a-z]/g, "").slice(-1);
+
+        if (input.value) {
+          const blanks = [...document.querySelectorAll(".letter-input")];
+          const next = blanks.find(item =>
+            !item.value && Number(item.dataset.position) > index
+);
+          if (next) next.focus();
+        }
+
+        checkCompletedWord();
+      });
+
+      input.addEventListener("keydown", event => {
+        if (event.key === "Backspace" && !input.value) {
+          const blanks = [...document.querySelectorAll(".letter-input")];
+          const previous = blanks.filter(item =>
+            Number(item.dataset.position) < index
+).pop();
+          if (previous) previous.focus();
+        }
+      });
+
+      $("letterSlots").appendChild(input);
+    }
   });
 }
 
-/* -----------------------------
-   RENDER LETTER SLOTS
------------------------------ */
-
-function renderSlots() {
-  $("letterSlots").replaceChildren();
-
-  for (let index = 0; index < state.pattern.length; index++) {
-    const character = state.pattern[index];
-
-    if (character !== "-") {
-      const fixed = document.createElement("div");
-
-      fixed.className = "fixed";
-      fixed.textContent = character;
-
-      $("letterSlots").appendChild(fixed);
-      continue;
-    }
-
-    const input = document.createElement("input");
-
-    input.className = "blank";
-    input.type = "text";
-    input.maxLength = 1;
-    input.autocomplete = "off";
-    input.spellcheck = false;
-    input.placeholder = "_";
-    input.dataset.position = String(index);
-
-    input.setAttribute(
-      "aria-label",
-      `Blank at position ${index + 1}`
-    );
-
-    input.addEventListener("input", () => {
-      input.value = input.value
-        .toLowerCase()
-        .replace(/[^a-z]/g, "")
-        .slice(-1);
-
-      if (input.value) {
-        const next = [
-          ...document.querySelectorAll(".blank")
-        ].find(blank =>
-          !blank.value &&
-          Number(blank.dataset.position) > index
-        );
-
-        if (next) next.focus();
-      }
-
-      checkCompletedWord();
-    });
-
-    input.addEventListener("keydown", event => {
-      if (event.key === "Backspace" && !input.value) {
-        const previous = [
-          ...document.querySelectorAll(".blank")
-        ].filter(blank =>
-          Number(blank.dataset.position) < index
-        ).pop();
-
-        if (previous) previous.focus();
-      }
-    });
-
-    $("letterSlots").appendChild(input);
-  }
-}
-
-/* -----------------------------
-   GET CURRENT WORD
------------------------------ */
-
 function getCompletedWord() {
-  if (!state) return null;
-
-  const blanks = [
-    ...document.querySelectorAll(".blank")
-  ];
-
-  let blankIndex = 0;
   let word = "";
+let blankIndex = 0;
+  const blanks = [...document.querySelectorAll(".letter-input")];
 
-  for (const character of state.pattern) {
-    if (character === "-") {
-      const input = blanks[blankIndex++];
-
-      if (!input || !input.value) {
-        return null;
-      }
-
-      word += input.value;
-    } else {
-      word += character;
-    }
-  }
-
-  return word;
+  for (const character of gameState.pattern) {
+if (character === "-") {
+      if (!blanks[blankIndex]?.value) return null;
+      word += blanks[blankIndex].value;
+      blankIndex++;
+} else {
+word += character;
 }
-
-/* -----------------------------
-   DICTIONARY VERIFICATION
-
-   Only the dictionary endpoint can
-   validate a word. Suggestion APIs
-   are never used for acceptance.
-
-   A valid result must include a
-   non-empty definition.
------------------------------ */
+@@ -299,126 +344,191 @@
+return word;
+}
 
 async function isEnglishWord(word) {
-  if (!/^[a-z]+$/.test(word)) {
-    return {
-      valid: false,
-      definitions: []
-    };
-  }
-
-  const controller = new AbortController();
-
-  const timeout = setTimeout(
-    () => controller.abort(),
-    6000
+  const response = await fetch(
+"https://api.dictionaryapi.dev/api/v2/entries/en/" +
+    encodeURIComponent(word)
   );
 
-  try {
-    const response = await fetch(
-      "https://api.dictionaryapi.dev/api/v2/entries/en/" +
-      encodeURIComponent(word),
-      { signal: controller.signal }
+  if (!response.ok) return false;
+
+  const data = await response.json();
+  return Array.isArray(data) &&
+    data.some(entry =>
+      Array.isArray(entry.meanings) && entry.meanings.length > 0
     );
+}
 
-    if (response.status === 404) {
-      return {
-        valid: false,
-        definitions: []
-      };
+async function checkCompletedWord() {
+  if (checking || !gameState || gameState.finished) return;
+
+const word = getCompletedWord();
+if (!word) {
+showMessage("Keep filling the blanks, one letter at a time.");
+return;
+}
+
+checking = true;
+  [...document.querySelectorAll(".letter-input")].forEach(input => {
+    input.disabled = true;
+  });
+  $("clearButton").disabled = true;
+  $("giveUpButton").disabled = true;
+  showMessage("Checking the word in the English dictionary…");
+
+try {
+    if (gameState.used.has(word)) {
+      showMessage("That word has already been used. Clear the blanks and try another word.", "error");
+      return;
     }
 
-    if (!response.ok) {
-      throw new Error("Dictionary service unavailable");
-    }
+const valid = await isEnglishWord(word);
 
-    const data = await response.json();
+if (!valid) {
+      showMessage(`"${word}" was not recognized as an English word. Change the letters and try again.`, "error");
+return;
+}
 
-    const definitions = Array.isArray(data)
-      ? data.flatMap(entry =>
-          Array.isArray(entry.meanings)
-            ? entry.meanings.flatMap(meaning =>
-                Array.isArray(meaning.definitions)
-                  ? meaning.definitions
-                      .map(item => item.definition)
-                      .filter(definition =>
-                        typeof definition === "string" &&
-                        definition.trim().length > 0
-                      )
-                      .map(definition => ({
-                        partOfSpeech:
-                          meaning.partOfSpeech || "",
-                        definition: definition.trim()
-                      }))
-                  : []
-              )
-            : []
-        )
-      : [];
+    gameState.used.add(word);
+    gameState.history.push({
+      word,
+      player: gameState.players[gameState.current].name
+    });
 
-    return {
-      valid: definitions.length > 0,
-      definitions
-    };
+    showMessage(`Correct! "${word}" is accepted. Next player's turn!`, "success");
+renderHistory();
+
+    gameState.current = (gameState.current + 1) % gameState.players.length;
+renderPlayers();
+$("turnLabel").textContent =
+      `Your turn, ${gameState.players[gameState.current].name}!`;
+
+setTimeout(() => {
+      if (!gameState || gameState.finished) return;
+checking = false;
+      $("clearButton").disabled = false;
+      $("giveUpButton").disabled = false;
+renderSlots();
+showMessage("Enter one letter in each blank.");
+      const first = document.querySelector(".letter-input");
+if (first) first.focus();
+    }, 900);
+
+    return;
+} catch (error) {
+    showMessage("Couldn't reach the dictionary. Check your internet connection, then clear the blanks and try again.", "error");
   } finally {
-    clearTimeout(timeout);
+    if (!gameState || gameState.finished) return;
+    // Keep inputs locked briefly after a valid word.
+    if (gameState && !gameState.history.length === 0) {
+      // No action needed here.
+    }
+    if ($("giveUpButton").disabled && $("result").classList.contains("hidden")) {
+      // The success timeout handles unlocking.
+    } else {
+      checking = false;
+      [...document.querySelectorAll(".letter-input")].forEach(input => {
+        input.disabled = false;
+      });
+      $("clearButton").disabled = false;
+      $("giveUpButton").disabled = false;
+    }
   }
 }
 
-/* -----------------------------
-   WORD HISTORY
------------------------------ */
-
 function renderHistory() {
-  $("wordHistory").replaceChildren();
+  $("wordHistory").innerHTML = "";
 
-  if (!state.history.length) {
-    $("wordHistory").textContent = "No words used yet.";
+  if (!gameState.history.length) {
+    $("wordHistory").textContent = "No words yet.";
     return;
-  }
+}
 
-  state.history.forEach(item => {
+  gameState.history.forEach(item => {
     const chip = document.createElement("span");
-
-    chip.className = "chip";
+    chip.className = "word-chip";
     chip.textContent = `${item.word} — ${item.player}`;
-
     $("wordHistory").appendChild(chip);
   });
 }
 
-/* -----------------------------
-   CLEAR BLANKS
------------------------------ */
-
-function clearBlanks() {
-  if (checking || hinting) return;
-
-  document.querySelectorAll(".blank").forEach(input => {
-    input.value = "";
-  });
-
-  showMessage("Blanks cleared. Try another word.");
-
-  const first = document.querySelector(".blank");
-  if (first) first.focus();
-}
-
-/* -----------------------------
-   CHECK COMPLETED WORD
------------------------------ */
-
-async function checkCompletedWord() {
-  if (
-    checking ||
-    hinting ||
-    !state ||
-    state.finished
-  ) {
-    return;
-  }
-
-  const word = getCompletedWord();
-
-  if (!word) {
-    showMessage("Keep filling the blanks, one letter at a time.");
-    return;
-  }
-
-  if (state.used.has(word)) {
-    showMessage(
-      `"${word}" has already been used. Change a letter or clear the blanks.`,
-      "error"
-    );
-    return;
-  }
-
-  checking = true;
-
-  const myToken = ++turnToken;
-
-  setControlsDisabled(true);
-  showMessage("Checking the dictionary…");
-
-  try {
-    const result = await isEnglishWord(word);
-
-    if (
-      !state ||
-      state.finished ||
-      myToken !== turnToken
-    ) {
-      return;
-    }
-
-    if (!result.valid) {
-      checking = false;
-      setControlsDisabled(false);
-
-      showMessage(
-        `"${word}" was not found with a dictionary definition. Try another word.`,
-        "error"
-      );
-
-      const blanks = [
-        ...document.querySelectorAll(".blank")
-      ];
-
-      if (blanks.length) {
-        blanks[blanks.length - 1].focus();
-        blanks[blanks.length - 1].select();
-      }
-
-      return;
-    }
-
-    if (state.used.has(word)) {
-      checking = false;
-      setControlsDisabled(false);
-
-      showMessage(
-        "That word has already been used.",
-        "error"
-      );
-
-      return;
-    }
-
-    const player = state.players[state.current];
-    const meaning = result.definitions[0];
-
-    // Record the accepted word.
-    state.used.add(word);
-
-    state.history.push({
-      word,
-      player: player.name
-    });
-
-    renderHistory();
-
-    // Show the actual dictionary definition.
-    showMeaning(
-      word,
-      meaning.definition,
-      meaning.partOfSpeech
-    );
-
-    showMessage(
-      `Accepted: "${word}"! Next player's turn.`,
-      "success"
-    );
-
-    // Move to the next player.
-    state.current =
-      (state.current + 1) % state.players.length;
-
-    renderPlayers();
-
-    $("turnLabel").textContent =
-      `${state.players[state.current].emoji} ` +
-      `${state.players[state.current].name}'s turn`;
-
-    // Keep the accepted word's meaning visible.
-    setTimeout(() => {
-      if (
-        !state ||
-        state.finished ||
-        myToken !== turnToken
-      ) {
-        return;
-      }
-
-      checking = false;
-
-      renderSlots();
-      setControlsDisabled(false);
-
-      showMessage(
-        "Enter one letter in each blank."
-      );
-
-      const first = document.querySelector(".blank");
-      if (first) first.focus();
-    }, 900);
-
-  } catch (error) {
-    if (
-      !state ||
-      state.finished ||
-      myToken !== turnToken
-    ) {
-      return;
-    }
-
-    checking = false;
-    setControlsDisabled(false);
-
-    showMessage(
-      "The dictionary could not respond. Check your internet connection and try again. Your word was not accepted.",
-      "error"
-    );
-  }
-}
-
-/* -----------------------------
-   HINT SYSTEM
-
-   Suggestions only help find a
-   possible answer. Each candidate
-   must still have a dictionary
-   definition before it can be used
-   as a hint.
-
-   The hint also respects letters
-   the player has already entered.
------------------------------ */
-
-async function giveHint() {
-  if (
-    !state ||
-    state.finished ||
-    checking ||
-    hinting
-  ) {
-    return;
-  }
-
-  const blanks = [
-    ...document.querySelectorAll(".blank")
-  ];
-
-  const emptyBlanks = blanks.filter(input =>
-    !input.value
-  );
-
-  if (!emptyBlanks.length) {
-    showMessage(
-      "All blanks are filled. The word is being checked or is ready to check."
-    );
-    return;
-  }
-
-  hinting = true;
-
-  const myHintToken = ++hintToken;
-  const myTurnToken = turnToken;
-  const patternAtStart = state.pattern;
-
-  $("hintButton").disabled = true;
-  $("clearButton").disabled = true;
-  $("giveUpButton").disabled = true;
-
-  showMessage("Finding a useful hint…");
-
-  try {
-    // Include letters already typed by the player.
-    const currentBlanks = new Map(
-      [...document.querySelectorAll(".blank")].map(input => [
-        Number(input.dataset.position),
-        input.value.toLowerCase()
-      ])
-    );
-
-    const searchPattern = [...state.pattern]
-      .map((character, index) => {
-        if (character !== "-") return character;
-
-        return currentBlanks.get(index) || "?";
-      })
-      .join("");
-
-    const response = await fetch(
-      "https://api.datamuse.com/words?sp=" +
-      encodeURIComponent(searchPattern) +
-      "&max=100"
-    );
-
-    if (!response.ok) {
-      throw new Error("Hint service unavailable");
-    }
-
-    const suggestions = await response.json();
-
-    if (
-      !state ||
-      state.finished ||
-      myHintToken !== hintToken ||
-      myTurnToken !== turnToken ||
-      state.pattern !== patternAtStart
-    ) {
-      return;
-    }
-
-    const candidates = suggestions
-      .map(item => item.word?.toLowerCase())
-      .filter(word =>
-        typeof word === "string" &&
-        /^[a-z]+$/.test(word) &&
-        word.length === state.pattern.length &&
-        [...state.pattern].every((character, index) => {
-          if (character !== "-") {
-            return character === word[index];
-          }
-
-          const entered = currentBlanks.get(index);
-
-          return !entered || entered === word[index];
-        }) &&
-        !state.used.has(word)
-      );
-
-    let candidate = null;
-
-    // Limit requests so hint generation stays manageable.
-    for (const word of candidates.slice(0, 8)) {
-      const result = await isEnglishWord(word);
-
-      if (
-        !state ||
-        state.finished ||
-        myHintToken !== hintToken ||
-        myTurnToken !== turnToken
-      ) {
-        return;
-      }
-
-      if (result.valid && result.definitions.length) {
-        candidate = {
-          word,
-          definition: result.definitions[0].definition
-        };
-
-        break;
-      }
-    }
-
-    if (!candidate) {
-      showMessage(
-        "No suitable hint was found for this pattern. Try again or choose another pattern.",
-        "error"
-      );
-
-      return;
-    }
-
-    // Re-check the blank slots before revealing a letter.
-    const available = [
-      ...document.querySelectorAll(".blank")
-    ].filter(input => !input.value);
-
-    const target = available.find(input =>
-      currentBlanks.get(Number(input.dataset.position)) === "" ||
-      !currentBlanks.has(Number(input.dataset.position))
-    );
-
-    if (!target) {
-      showMessage(
-        "No empty blanks are available.",
-        "error"
-      );
-
-      return;
-    }
-
-    const position = Number(target.dataset.position);
-
-    target.value = candidate.word[position];
-
-    // Show a definition clue without automatically
-    // accepting the hinted answer.
-    showMeaning(
-      "💡 Hint",
-      candidate.definition
-    );
-
-    showMessage(
-      "One letter has been revealed. Use the meaning clue to finish the word.",
-      "success"
-    );
-
-    // Check the word if the hint filled the last blank.
-    target.dispatchEvent(
-      new Event("input", { bubbles: true })
-    );
-
-  } catch (error) {
-    if (
-      state &&
-      !state.finished &&
-      myHintToken === hintToken
-    ) {
-      showMessage(
-        "Hints are temporarily unavailable. Check your internet connection and try again.",
-        "error"
-      );
-    }
-  } finally {
-    if (myHintToken === hintToken) {
-      hinting = false;
-
-      if (state && !state.finished && !checking) {
-        $("hintButton").disabled = false;
-        $("clearButton").disabled = false;
-        $("giveUpButton").disabled = false;
-      }
-    }
-  }
-}
-
-/* -----------------------------
-   START GAME
------------------------------ */
-
 function startGame() {
-  const pattern = $("patternInput")
-    .value
-    .trim()
-    .toLowerCase();
+const pattern = $("patternInput").value.trim().toLowerCase();
 
-  if (
-    !/^[a-z-]+$/.test(pattern) ||
-    !pattern.includes("-")
-  ) {
-    alert(
-      "Use English letters and at least one dash, such as g--t, r--e, or --t."
-    );
+if (!/^[a-z-]+$/.test(pattern) || !pattern.includes("-")) {
+    alert("Enter a pattern using English letters and at least one dash, such as --t or c--t.");
+return;
+}
 
-    return;
-  }
+const names = [...document.querySelectorAll(".nameField")]
+.map((input, index) => input.value.trim() || `Player ${index + 1}`);
 
-  const names = [
-    ...document.querySelectorAll(".nameField")
-  ].map((input, index) =>
-    input.value.trim() || `Player ${index + 1}`
-  );
-
-  // Invalidate all outstanding asynchronous operations.
-  turnToken++;
-  hintToken++;
+  gameState = {
+pattern,
+players: names.map((name, index) => ({
+name,
+@@ -431,61 +541,64 @@
+finished: false
+};
 
   checking = false;
-  hinting = false;
+$("setup").classList.add("hidden");
+$("result").classList.add("hidden");
+$("game").classList.remove("hidden");
+$("patternLabel").textContent = `Pattern: ${pattern}`;
+  $("turnLabel").textContent = `Your turn, ${names[0]}!`;
 
-  state = {
-    pattern,
-
-    players: names.map((name, index) => ({
-      name,
-      emoji: emojis[index],
-      color: colors[index]
-    })),
-
-    current: 0,
-    used: new Set(),
-    history: [],
-    finished: false
-  };
-
-  $("setup").classList.add("hidden");
-  $("result").classList.add("hidden");
-  $("game").classList.remove("hidden");
-
-  $("patternLabel").textContent =
-    `Pattern: ${pattern}`;
-
-  $("turnLabel").textContent =
-    `${state.players[0].emoji} ` +
-    `${state.players[0].name}'s turn`;
-
-  renderPlayers();
-  renderSlots();
-  renderHistory();
-  resetMeaning();
-
-  setControlsDisabled(false);
-
-  showMessage(
-    "Fill the blanks to form an English word."
-  );
-
-  const first = document.querySelector(".blank");
-  if (first) first.focus();
+renderPlayers();
+renderSlots();
+renderHistory();
+  showMessage("Enter one letter in each blank.");
+  const first = document.querySelector(".letter-input");
+if (first) first.focus();
 }
-
-/* -----------------------------
-   END GAME
------------------------------ */
 
 function finishGame() {
-  if (
-    !state ||
-    state.finished ||
-    checking ||
-    hinting
-  ) {
-    return;
-  }
+  if (!gameState || gameState.finished || checking) return;
 
-  state.finished = true;
+  gameState.finished = true;
+  const player = gameState.players[gameState.current];
 
-  turnToken++;
-  hintToken++;
+$("game").classList.add("hidden");
+$("result").classList.remove("hidden");
+  $("resultTitle").textContent = `🏁 ${player.name} couldn't find a word!`;
 
-  const player = state.players[state.current];
+  const remaining = gameState.players
+    .filter((p, index) => index !== gameState.current)
+    .map(p => p.name);
 
-  const others = state.players
-    .filter((_, index) => index !== state.current)
-    .map(player => player.name);
-
-  $("game").classList.add("hidden");
-  $("result").classList.remove("hidden");
-
-  $("resultTitle").textContent =
-    `${player.emoji} ${player.name} couldn't find a word!`;
-
-  $("resultText").textContent =
-    `The game ended on pattern "${state.pattern}". ` +
-    `${player.name} gave up. ` +
-    (others.length
-      ? `Other players: ${others.join(", ")}.`
-      : "");
+  $("resultText").textContent = remaining.length
+    ? `The player who couldn't complete the pattern ${gameState.pattern} is ${player.name}. Other players: ${remaining.join(", ")}.`
+    : `${player.name} couldn't complete the pattern.`;
 }
 
-/* -----------------------------
-   BUTTON EVENTS
------------------------------ */
+$("startButton").addEventListener("click", startGame);
 
-$("startButton").addEventListener(
-  "click",
-  startGame
-);
+$("clearButton").addEventListener("click", () => {
+  if (checking) return;
+  document.querySelectorAll(".letter-input").forEach(input => {
+    input.value = "";
+  });
+  showMessage("Blanks cleared. Try a different word.");
+  const first = document.querySelector(".letter-input");
+  if (first) first.focus();
+});
 
-$("clearButton").addEventListener(
-  "click",
-  clearBlanks
-);
-
-$("hintButton").addEventListener(
-  "click",
-  giveHint
-);
-
-$("giveUpButton").addEventListener(
-  "click",
-  finishGame
-);
+$("giveUpButton").addEventListener("click", finishGame);
 
 $("againButton").addEventListener("click", () => {
-  turnToken++;
-  hintToken++;
-
-  checking = false;
-  hinting = false;
-
-  $("result").classList.add("hidden");
-  $("setup").classList.remove("hidden");
-  $("game").classList.add("hidden");
+$("result").classList.add("hidden");
+$("setup").classList.remove("hidden");
+$("game").classList.add("hidden");
 });
 
 $("settingsButton").addEventListener("click", () => {
-  turnToken++;
-  hintToken++;
-
-  checking = false;
-  hinting = false;
-
-  $("result").classList.add("hidden");
-  $("game").classList.add("hidden");
-  $("setup").classList.remove("hidden");
-});
-
-</script>
-</body>
-</html>
+$("result").classList.add("hidden");
+$("game").classList.add("hidden");
+$("setup").classList.remove("hidden");
